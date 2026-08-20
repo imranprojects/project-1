@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeMind AI - Video Content Intelligence Platform</title>
+    <meta name="description" content="An enterprise-grade platform for extracting transcripts, generating executive summaries, and conducting concept mapping of YouTube videos.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Main Dashboard Layout -->
+    <div class="dashboard-wrapper">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <span class="brand-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                    </span>
+                    <h2>TubeMind <span class="accent-text">AI</span></h2>
+                </div>
+            </div>
+            
+            <div class="sidebar-actions">
+                <button type="button" id="new-analysis-btn" class="btn btn-new-analysis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>New Analysis</span>
+                </button>
+            </div>
+
+            <!-- History List -->
+            <div class="sidebar-menu-wrapper">
+                <h3 class="menu-title">Recent Analyses</h3>
+                <ul id="history-list" class="history-list">
+                    <li class="history-empty">No reports saved locally</li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="status-badge">
+                    <span class="status-dot green"></span>
+                    <span>API Connected</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Global Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-title">
+                    <h1>Content Intelligence Dashboard</h1>
+                </div>
+                <div class="platform-meta">
+                    <span class="badge badge-platform">Version 2.2</span>
+                </div>
+            </header>
+
+            <!-- Workspace Panel -->
+            <div class="workspace-panel">
+                
+                <!-- URL Input Container -->
+                <section id="search-section" class="search-section">
+                    <div class="input-card">
+                        <h2>YouTube Video Analyzer</h2>
+                        <p>Extract, analyze, and generate professional intelligence reports for any YouTube video.</p>
+                        
+                        <form id="summarize-form" class="url-form">
+                            <div class="input-group">
+                                <div class="input-wrapper">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+                                    </span>
+                                    <input 
+                                        type="url" 
+                                        id="video-url" 
+                                        placeholder="https://www.youtube.com/watch?v=..." 
+                                        required 
+                                        autocomplete="off"
+                                    >
+                                </div>
+                                <button type="submit" id="submit-btn" class="btn btn-primary">
+                                    <span>Analyze</span>
+                                    <svg class="btn-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Loading State Container -->
+                <section id="loading-state" class="loading-state hidden">
+                    <div class="loading-spinner-wrapper">
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <div class="loading-text">
+                        <h3 id="loader-heading">Connecting to Youtube Services</h3>
+                        <p id="loader-subtext">Initializing metadata scraper.</p>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                </section>
+
+                <!-- Error State Container -->
+                <section id="error-state" class="error-state hidden">
+                    <div class="error-circle">!</div>
+                    <div class="error-details">
+                        <h3>An Error Occurred</h3>
+                        <p id="error-description">Please check the URL or try again later.</p>
+                    </div>
+                    <button type="button" id="retry-btn" class="btn btn-secondary btn-sm">Reset Form</button>
+                </section>
+
+                <!-- Empty State (No Report Loaded) -->
+                <section id="empty-state" class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </div>
+                    <h3>No Report Loaded</h3>
+                    <p>Enter a YouTube URL above or select a previous analysis from the sidebar history list.</p>
+                </section>
+
+                <!-- Results Layout -->
+                <section id="results-container" class="results-container hidden">
+                    
+                    <!-- Metadata Header Panel -->
+                    <div class="results-header-panel">
+                        <div class="video-meta-grid">
+                            <div class="video-thumbnail-box">
+                                <img id="video-thumbnail" src="" alt="Thumbnail">
+                                <div id="video-duration" class="meta-duration-tag">0:00</div>
+                            </div>
+                            <div class="video-details-box">
+                                <h2 id="video-title">Analyzing Technical Architecture of Distributed Databases</h2>
+                                <p id="video-channel" class="channel-name">Channel Tech Talk</p>
+                                
+                                <div class="video-stats-row">
+                                    <span class="stat-tag">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        <span id="video-views">0</span> views
+                                    </span>
+                                    <span class="dot-divider">•</span>
+                                    <span class="stat-tag">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        <span id="video-date">Date</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="action-toolbar">
+                            <button type="button" id="download-pdf-btn" class="btn btn-secondary-action">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>PDF Summary</span>
+                            </button>
+                            <button type="button" id="download-txt-btn" class="btn btn-secondary-action">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                                <span>Markdown Report</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Badges Row -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-title">COMPLEXITY</span>
+                            <div id="badge-difficulty" class="metric-value">Advanced</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-title">ESTIMATED STUDY TIME</span>
+                            <div id="badge-reading-time" class="metric-value">12 min</div>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-title">TRANSCRIPTION TYPE</span>
+                            <div id="badge-source" class="metric-value font-mono">youtube_captions</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs Menu -->
+                    <div class="tabs-navigation">
+                        <button type="button" class="tab-btn active" data-target="tab-overview">Overview</button>
+                        <button type="button" class="tab-btn" data-target="tab-technical">Topics & Tech</button>
+                        <button type="button" class="tab-btn" data-target="tab-transcript">Transcript</button>
+                    </div>
+
+                    <!-- Tab Panels -->
+                    <div class="tabs-viewport">
+                        
+                        <!-- Tab 1: Overview -->
+                        <div id="tab-overview" class="tab-panel active">
+                            <div class="content-block">
+                                <h3 class="panel-section-title">Executive Summary</h3>
+                                <p id="analysis-summary" class="summary-paragraph">
+                                    Summary content will load here.
+                                </p>
+                            </div>
+                            
+                            <div class="content-block">
+                                <h3 class="panel-section-title">Key Takeaways</h3>
+                                <ul id="analysis-takeaways" class="takeaways-grid-list">
+                                    <!-- Populated dynamically -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Technical -->
+                        <div id="tab-technical" class="tab-panel">
+                            <div class="content-block">
+                                <h3 class="panel-section-title">Mapped Concepts & Topics</h3>
+                                <div id="analysis-topics" class="badges-row">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                            
+                            <div class="content-block">
+                                <h3 class="panel-section-title">Detected Technologies</h3>
+                                <div id="analysis-technologies" class="badges-row">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Transcript -->
+                        <div id="tab-transcript" class="tab-panel">
+                            <div class="transcript-controls">
+                                <button type="button" id="copy-transcript-btn" class="btn btn-copy-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Copy Transcript</span>
+                                </button>
+                            </div>
+                            <div id="transcript-text" class="transcript-viewport">
+                                <!-- Raw text loaded here -->
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Alert Toast -->
+    <div id="toast" class="toast hidden">Copied to clipboard!</div>
+
+    <script src="app.js"></script>
+</body>
+</html>
